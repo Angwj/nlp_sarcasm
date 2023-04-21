@@ -16,7 +16,7 @@ sklearn==0.0.post1
 skorch==0.12.1
 SpeechRecognition==3.10.0
 streamlit==1.21.0
-torch>=2.0.0,<=2.0.1
+torch
 torchvision==0.15.0
 tqdm==4.65.0
 transformers==4.27.4
