@@ -12,7 +12,7 @@ opensmile==2.4.2
 pandas == 1.5.3
 scipy==1.10.1
 seaborn==0.12.2
-scikit-learn==0.0.post1
+scikit-learn
 skorch==0.12.1
 SpeechRecognition==3.10.0
 streamlit==1.21.0
