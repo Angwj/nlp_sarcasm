@@ -10,7 +10,7 @@ opencv-python
 opencv-contrib-python==4.7.0.72
 opensmile==2.4.2
 pandas == 1.5.3
-scikit-learn
+sklearn
 scipy==1.10.1
 seaborn==0.12.2
 scikit-learn==0.0.post1
