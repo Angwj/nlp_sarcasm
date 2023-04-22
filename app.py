@@ -14,6 +14,8 @@ A_DIM = 360
 V_DIM = 2048
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+#@st.cache() decorator to avoid reloading the model each time 
+@st.cache
 
 class GlobalAvgPool(nn.Module):
     def __init__(self):
@@ -28,7 +30,7 @@ def load_extractor():
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
     model = AutoModel.from_pretrained(pretrained_model)
 
-    resnet152 = models.resnet152(weights=True)
+    resnet152 = models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1)
     resnet152 = nn.Sequential(*list(resnet152.children())[:-2], GlobalAvgPool())
     resnet152.eval()
     resnet152 = resnet152.to(DEVICE)
@@ -59,8 +61,7 @@ def predict(text, audio, visual, text_c, audio_c, visual_c):
 extractor = load_extractor()
 print('loaded')
 
-#@st.cache() decorator to avoid reloading the model each time 
-st.cache(show_spinner=True)
+
 
 st.set_page_config(
     page_title="Sarcasm Detector",
