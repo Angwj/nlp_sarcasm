@@ -4,8 +4,8 @@ import opensmile
 import numpy as np
 import librosa
 import speech_recognition as SR
-from Katna.video import Video
-from Katna.writer import KeyFrameDiskWriter
+# from Katna.video import Video
+# from Katna.writer import KeyFrameDiskWriter
 from moviepy.editor import VideoFileClip
 import tempfile
 import ffmpeg
@@ -42,7 +42,7 @@ class FeatureExtractor():
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
     
-        self.video = Video()
+        # self.video = Video()
 
     #-----------------------------------------------#
     #                  TEXT
