@@ -14,8 +14,7 @@ A_DIM = 360
 V_DIM = 2048
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-#@st.cache() decorator to avoid reloading the model each time 
-@st.cache
+
 
 class GlobalAvgPool(nn.Module):
     def __init__(self):
@@ -23,7 +22,9 @@ class GlobalAvgPool(nn.Module):
 
     def forward(self, x):
         return torch.mean(x, dim=[-2, -1])
-    
+
+#@st.cache() decorator to avoid reloading the model each time 
+@st.cache
 def load_extractor():
     pretrained_model = 'bert-base-uncased'
     
@@ -55,6 +56,7 @@ def predict(text, audio, visual, text_c, audio_c, visual_c):
             prediction = model(text, audio, visual, text_c, audio_c, visual_c)
             prob = torch.softmax(prediction, dim=1)
             prob = prob[0][1].item()
+            
         return torch.argmax(prediction).item() , round(prob, 2)
     
 
