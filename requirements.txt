@@ -6,8 +6,7 @@ librosa==0.10.0.post2
 matplotlib==3.7.1
 moviepy==1.0.3
 numpy ==1.23.5
-opencv-python
-opencv-contrib-python==4.7.0.72
+opencv-python-headless
 opensmile==2.4.2
 pandas == 1.5.3
 scipy==1.10.1
