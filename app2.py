@@ -37,7 +37,7 @@ def load_trans():
     resnet152.eval()
     
     # extractor = FeatureExtractor(tokenizer=tokenizer, model=model, resnet152=resnet152)
-    model_path = './LateFusion/lf_models/lf_adam.Adam.pth'
+    model_path = '../LateFusion/lf_models/lf_adam.Adam.pth'
     pred_model = LF_DNN1(sn_dropout=0.2, fusion_dropout=0.3)
     pred_model.load_state_dict(torch.load(model_path))
     pred_model.to(DEVICE)
@@ -66,33 +66,6 @@ def predict(pred_model, text, audio, visual, text_c, audio_c, visual_c):
             prob = prob[0][1].item()
             
         return torch.argmax(prediction).item() , round(prob, 2)
-    
-
-def mean_pooling(model_output, attention_mask):
-    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
-    sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-    return sum_embeddings / sum_mask
-
-def extractTextFeatures(tokenizer, model, text):
-        #Tokenize sentences
-        encoded_input = tokenizer([text],
-                                        add_special_tokens = True, 
-                                        padding='max_length',
-                                        max_length = 100,
-                                        truncation=True,
-                                        return_tensors='pt')
-
-        #Compute token embeddings
-        with torch.no_grad():
-            model_output = model(**encoded_input)
-
-        #Perform pooling. In this case, mean pooling
-        sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
-        
-        return sentence_embeddings.squeeze()
-
 
 
 
@@ -105,7 +78,7 @@ def main():
 
     tokenizer, model, resnet152, pred_model = load_trans()
     extractor = FeatureExtractor(tokenizer=tokenizer, model=model, resnet152=resnet152)
-    print('loaded')
+    print('LOADED1')
 
     
 
@@ -131,28 +104,28 @@ def main():
     if input_type == "Text":
         input_data = col1.text_area("Enter text (max 100 words):", max_chars=100,key='utterance')
 
-    # elif input_type == "Audio":
-    #     input_data = col1.file_uploader("Upload audio file (mp3, wav):", type=["mp3", "wav"],key='utterance')
-    #     if input_data is not None:
-    #         # Save audio as buffer to allow multiple references
-    #         audio_buffer_u = BytesIO(input_data.read())
-    #         col1.audio(audio_buffer_u.getvalue(), format='audio/' + input_data.type.split('/')[1])
-    #         audio_buffer_u.seek(0)
-    #         A_u, T_u = extractor.extractAudioFeatures(audio_buffer_u)
-    #         col1.info("Text transcripted: "+T_u)
+    elif input_type == "Audio":
+        input_data = col1.file_uploader("Upload audio file (mp3, wav):", type=["mp3", "wav"],key='utterance')
+        if input_data is not None:
+            # Save audio as buffer to allow multiple references
+            audio_buffer_u = BytesIO(input_data.read())
+            col1.audio(audio_buffer_u.getvalue(), format='audio/' + input_data.type.split('/')[1])
+            audio_buffer_u.seek(0)
+            A_u, T_u = extractor.extractAudioFeatures(audio_buffer_u)
+            col1.info("Text transcripted: "+T_u)
 
-    # else:
-    #     input_data = col1.file_uploader("Upload video file (mp4, avi):", type=["mp4", "avi", "mov"],key='utterance')
-    #     if input_data is not None:
-    #         suffix = input_data.type
-    #         suffix = suffix.split('/')[1]
-    #         # Save video file to temporary directory
-    #         tmpvideo = './tmp/tmpvideo.'+suffix
-    #         with tempfile.NamedTemporaryFile(delete=False, suffix='.'+suffix) as tmpvideo:
-    #             tmpvideo.write(input_data.read())
-    #             video_file_u = tmpvideo.name
-    #         col1.video(video_file_u)
-    #         V_u, A_u, T_u = extractor.extractVideoFeatures(video_file_u)
+    else:
+        input_data = col1.file_uploader("Upload video file (mp4, avi):", type=["mp4", "avi", "mov"],key='utterance')
+        if input_data is not None:
+            suffix = input_data.type
+            suffix = suffix.split('/')[1]
+            # Save video file to temporary directory
+            tmpvideo = './tmp/tmpvideo.'+suffix
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.'+suffix) as tmpvideo:
+                tmpvideo.write(input_data.read())
+                video_file_u = tmpvideo.name
+            col1.video(video_file_u)
+            V_u, A_u, T_u = extractor.extractVideoFeatures(video_file_u)
 
     #----------------------------------------------#
     #               Context input                  #
@@ -163,27 +136,27 @@ def main():
         if input_type == "Text":
             input_data2 = col2.text_area("Enter text (max 100 words):", max_chars=100,key='context')
 
-        # elif input_type == "Audio":
-        #     input_data2 = col2.file_uploader("Upload audio file (mp3, wav):", type=["mp3", "wav"],key='context')
-        #     if input_data2 is not None:
-        #         # Save audio as buffer to allow multiple references
-        #         audio_buffer_c = BytesIO(input_data2.read())
-        #         col2.audio(audio_buffer_c.getvalue(), format='audio/' + input_data2.type.split('/')[1])
-        #         audio_buffer_c.seek(0)
-        #         A_c, T_c = extractor.extractAudioFeatures(audio_buffer_c)
-        #         col2.info("Text transcripted: "+T_c)
+        elif input_type == "Audio":
+            input_data2 = col2.file_uploader("Upload audio file (mp3, wav):", type=["mp3", "wav"],key='context')
+            if input_data2 is not None:
+                # Save audio as buffer to allow multiple references
+                audio_buffer_c = BytesIO(input_data2.read())
+                col2.audio(audio_buffer_c.getvalue(), format='audio/' + input_data2.type.split('/')[1])
+                audio_buffer_c.seek(0)
+                A_c, T_c = extractor.extractAudioFeatures(audio_buffer_c)
+                col2.info("Text transcripted: "+T_c)
 
-        # else:
-        #     input_data2 = col2.file_uploader("Upload video file (mp4, avi):", type=["mp4", "avi", "mov"],key='context')
-        #     if input_data2 is not None:
-        #         # Save file to temporary directory
-        #         suffix = input_data2.type
-        #         suffix = suffix.split('/')[1]
+        else:
+            input_data2 = col2.file_uploader("Upload video file (mp4, avi):", type=["mp4", "avi", "mov"],key='context')
+            if input_data2 is not None:
+                # Save file to temporary directory
+                suffix = input_data2.type
+                suffix = suffix.split('/')[1]
 
-        #         with tempfile.NamedTemporaryFile(delete=False, suffix='.'+suffix) as tmpvideo2:
-        #             tmpvideo2.write(input_data2.read())
-        #             video_file_c = tmpvideo2.name
-        #         col2.video(video_file_c)
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.'+suffix) as tmpvideo2:
+                    tmpvideo2.write(input_data2.read())
+                    video_file_c = tmpvideo2.name
+                col2.video(video_file_c)
 
     # Predict button
     if st.button("Predict"):
@@ -201,38 +174,38 @@ def main():
                 A_c = torch.zeros(A_DIM)
                 V_c = torch.zeros(V_DIM)
 
-            # elif input_type == "Audio":
-            #     T_u = extractor.extractTextFeatures(T_u)
-            #     A_u = torch.tensor(A_u)
-            #     V_u = torch.zeros(V_DIM)
+            elif input_type == "Audio":
+                T_u = extractor.extractTextFeatures(T_u)
+                A_u = torch.tensor(A_u)
+                V_u = torch.zeros(V_DIM)
                 
-            #     if input_data2:
-            #         T_c = extractor.extractTextFeatures(T_c)  
-            #         A_c = torch.tensor(A_c) 
+                if input_data2:
+                    T_c = extractor.extractTextFeatures(T_c)  
+                    A_c = torch.tensor(A_c) 
                     
-            #     else:
-            #         T_c = torch.zeros(T_DIM)
-            #         A_c = torch.zeros(A_DIM)
-            #     V_c = torch.zeros(V_DIM)
+                else:
+                    T_c = torch.zeros(T_DIM)
+                    A_c = torch.zeros(A_DIM)
+                V_c = torch.zeros(V_DIM)
 
-            # else:
-            #     # V_u, A_u, T_u = extractor.extractVideoFeatures(video_file_u)
-            #     T_u = extractor.extractTextFeatures(T_u)
-            #     A_u = torch.tensor(A_u)
-            #     V_u = torch.tensor(V_u)
+            else:
+                # V_u, A_u, T_u = extractor.extractVideoFeatures(video_file_u)
+                T_u = extractor.extractTextFeatures(T_u)
+                A_u = torch.tensor(A_u)
+                V_u = torch.tensor(V_u)
 
-                # if input_data2:
-                #     V_c, A_c, T_c = extractor.extractVideoFeatures(video_file_c)
-                #     T_c = extractor.extractTextFeatures(T_c)
-                #     A_c = torch.tensor(A_c)
-                #     V_c = torch.tensor(V_c)
-                #     os.remove(video_file_c)
-                # else:
-                #     T_c = torch.zeros(T_DIM)
-                #     A_c = torch.zeros(A_DIM)
-                #     V_c = torch.zeros(V_DIM)
-                # # remove temporary video file
-                # os.remove(video_file_u)
+                if input_data2:
+                    V_c, A_c, T_c = extractor.extractVideoFeatures(video_file_c)
+                    T_c = extractor.extractTextFeatures(T_c)
+                    A_c = torch.tensor(A_c)
+                    V_c = torch.tensor(V_c)
+                    os.remove(video_file_c)
+                else:
+                    T_c = torch.zeros(T_DIM)
+                    A_c = torch.zeros(A_DIM)
+                    V_c = torch.zeros(V_DIM)
+                # remove temporary video file
+                os.remove(video_file_u)
                 
             # print(T_u.dtype, A_u.dtype, V_u.dtype, T_c.dtype, A_c.dtype, V_c.dtype)
             # print(T_u.shape, A_u.shape, V_u.shape, T_c.shape, A_c.shape, V_c.shape)
