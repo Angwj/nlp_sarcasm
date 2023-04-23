@@ -37,7 +37,7 @@ def load_trans():
     resnet152.eval()
     
     # extractor = FeatureExtractor(tokenizer=tokenizer, model=model, resnet152=resnet152)
-    model_path = '../LateFusion/lf_models/lf_adam.Adam.pth'
+    model_path = './LateFusion/lf_models/lf_adam.Adam.pth'
     pred_model = LF_DNN1(sn_dropout=0.2, fusion_dropout=0.3)
     pred_model.load_state_dict(torch.load(model_path))
     pred_model.to(DEVICE)
