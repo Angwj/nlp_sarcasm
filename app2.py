@@ -36,24 +36,15 @@ def load_trans():
     resnet152.to(DEVICE)
     resnet152.eval()
     
-    # extractor = FeatureExtractor(tokenizer=tokenizer, model=model, resnet152=resnet152)
-    model_path = '../LateFusion/lf_models/lf_adam.Adam.pth'
+    model_path = './LateFusion/lf_models/lf_adam.Adam.pth'
     pred_model = LF_DNN1(sn_dropout=0.2, fusion_dropout=0.3)
     pred_model.load_state_dict(torch.load(model_path))
     pred_model.to(DEVICE)
     pred_model.eval()
 
-    # extractor_hash = hash(extractor.to_string())
     return tokenizer, model, resnet152, pred_model
 
 def predict(pred_model, text, audio, visual, text_c, audio_c, visual_c):
-        # Load the trained multimodal model
-        # model_path = './LateFusion/lf_models/lf_adam.Adam.pth'
-        # model = LF_DNN1(sn_dropout=0.2, fusion_dropout=0.3)
-        # model.load_state_dict(torch.load(model_path))
-        # model.to(DEVICE)
-        # model.eval()
-
         with torch.no_grad():
             text = torch.unsqueeze(text.clone().detach().to(DEVICE), 0).float()
             audio = torch.unsqueeze(audio.clone().detach().to(DEVICE), 0).float()
